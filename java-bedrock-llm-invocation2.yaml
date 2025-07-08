@@ -1,0 +1,30 @@
+rules:
+  - id: java-llm-bedrock-invocation-generic
+    languages: [java]
+    severity: ERROR
+    message: >
+      Potential LLM/Bedrock/AI model invocation detected. Calling '$METHOD' on '$SERVICE' may indicate use of a generative model API.
+    patterns:
+      - pattern: $RESULT = $SERVICE.$METHOD($REQ, ...);
+      - pattern-inside: |
+          class $CLASS {
+            ...
+          }
+      - metavariable-regex:
+          metavariable: $SERVICE
+          regex: "(awsService|bedrock|llm|llmService|bedrockService|aiService|mlService|.*LLM.*Service|.*Bedrock.*Service|.*AI.*Service|.*ML.*Service)"
+      - metavariable-regex:
+          metavariable: $METHOD
+          regex: "(invokeAgent|bedrock|llm|invoke|fetch|run|call|generate|completion|predict|infer).*"
+    metadata:
+      shortDescription: "LLM/Bedrock service method invocation detected"
+      cwe: "CWE-1427"
+      security-severity: "Medium"
+      category: "security"
+      license: Custom (c) Demandbase
+      references:
+        - https://aws.amazon.com/bedrock/
+        - https://docs.aws.amazon.com/bedrock/latest/userguide/what-is-bedrock.html
+    paths:
+      include:
+        - "*.java"
